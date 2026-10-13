@@ -1,0 +1,40 @@
+[
+  {
+    "id": "lts",
+    "name": "Space sustainability",
+    "description": "UN Guidelines for the Long-term Sustainability of Outer Space Activities: the 2019 guidelines text, plus UN documents from 2024–2026.",
+    "status": "live",
+    "backend": "foundry_agent",
+    "agent_name": "lts-agent",
+    "retrieval": "Foundry file search",
+    "sources_file": "sources/lts.json",
+    "examples": [
+      ["Implementation challenges States report", "What challenges do States report in implementing the LTS guidelines, and which guidelines do they find hardest to apply?"],
+      ["How national reporting approaches differ", "How do the UK and Canada report on their implementation of the LTS guidelines, and how do their approaches differ?"],
+      ["Gaps new guidelines aim to fill", "What new guidelines have been proposed since 2024, and what gaps in the 2019 guidelines do they aim to address?"],
+      ["Sustainability beyond Earth orbit", "How are lunar activities being addressed in long-term sustainability discussions, and what concerns are raised about science on the Moon?"]
+    ]
+  },
+  {
+    "id": "debris",
+    "name": "Space debris mitigation",
+    "description": "UN, IADC and national debris mitigation guidelines and standards.",
+    "status": "planned",
+    "backend": "foundry_agent",
+    "agent_name": null,
+    "retrieval": "Foundry file search",
+    "sources_file": null,
+    "examples": []
+  },
+  {
+    "id": "resources",
+    "name": "Space resources",
+    "description": "UN discussions and national laws on mining the Moon and asteroids.",
+    "status": "planned",
+    "backend": "foundry_agent",
+    "agent_name": null,
+    "retrieval": "Foundry file search",
+    "sources_file": null,
+    "examples": []
+  }
+]
