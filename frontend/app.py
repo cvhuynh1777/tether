@@ -1,17 +1,39 @@
 """Tether chat UI (cyberpunk / glitch theme).
 
-Run locally (from the tether/ folder, with the backend already running):
+Two ways to run it:
+- With the FastAPI server: set BACKEND_URL (e.g. http://127.0.0.1:8000) and
+  the app talks to the API over HTTP. The container image does this.
+- On its own (Streamlit Community Cloud, or quick local runs): leave
+  BACKEND_URL unset and the app calls backend/service.py directly.
+
+Run locally (from the tether/ folder):
     python -m streamlit run frontend/app.py
 """
 
 import html
 import os
+import sys
 import time
+import uuid
+from pathlib import Path
 
 import requests
 import streamlit as st
 
-BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:8000")
+# Make the repo root importable so "backend" resolves when Streamlit runs
+# this file from the frontend/ folder.
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+try:  # local runs read .env; on Streamlit Cloud the secrets are env vars already
+    from dotenv import load_dotenv
+
+    load_dotenv(ROOT / ".env")
+except ImportError:
+    pass
+
+BACKEND_URL = os.environ.get("BACKEND_URL")  # unset = embedded mode
 
 MODEL = "gpt-5-mini"
 PLATFORM = "Microsoft Foundry on Azure"
@@ -471,6 +493,9 @@ if "messages" not in st.session_state:
     st.session_state.messages = []  # list of {role, content, citations}
 if "conversation_id" not in st.session_state:
     st.session_state.conversation_id = None
+if "session_id" not in st.session_state:
+    # Identifies this browser session to the backend's per-visitor rate limit.
+    st.session_state.session_id = uuid.uuid4().hex
 
 
 # ---------------------------------------------------------------------------
@@ -513,7 +538,29 @@ def typewriter(text: str):
         time.sleep(0.012)
 
 
+@st.cache_resource(show_spinner=False)
+def embedded_agents():
+    """One shared pool of agent clients for the whole Streamlit server."""
+    from backend import service
+
+    return service.AgentPool()
+
+
 def ask_backend(question: str, collection_id: str) -> dict:
+    if not BACKEND_URL:
+        from backend import service
+
+        try:
+            return service.chat(
+                embedded_agents(),
+                question,
+                collection_id,
+                st.session_state.conversation_id,
+                visitor=st.session_state.session_id,
+            )
+        except service.ServiceError as exc:
+            raise RuntimeError(exc.detail) from None
+
     resp = requests.post(
         f"{BACKEND_URL}/chat",
         json={
@@ -521,6 +568,7 @@ def ask_backend(question: str, collection_id: str) -> dict:
             "collection": collection_id,
             "conversation_id": st.session_state.conversation_id,
         },
+        headers={"X-Session-Id": st.session_state.session_id},
         timeout=120,
     )
     if resp.status_code in (400, 404, 429, 501):
@@ -531,7 +579,11 @@ def ask_backend(question: str, collection_id: str) -> dict:
 
 @st.cache_data(ttl=300, show_spinner=False)
 def fetch_collections() -> list[dict]:
-    """The collection registry from the backend, refreshed every 5 minutes."""
+    """The collection registry, refreshed every 5 minutes."""
+    if not BACKEND_URL:
+        from backend import service
+
+        return service.public_collections()
     resp = requests.get(f"{BACKEND_URL}/collections", timeout=10)
     resp.raise_for_status()
     return resp.json()
@@ -549,7 +601,10 @@ def reset_conversation() -> None:
 try:
     collections = fetch_collections()
 except Exception:
-    render_error(f"Can't reach the Tether API at {BACKEND_URL}. Start the backend, then refresh this page.")
+    if BACKEND_URL:
+        render_error(f"Can't reach the Tether API at {BACKEND_URL}. Start the backend, then refresh this page.")
+    else:
+        render_error("Couldn't load the collections registry (backend/collections.json).")
     st.stop()
 
 live = [c for c in collections if c["status"] == "live"]
@@ -677,7 +732,7 @@ if question:
         st.markdown(question)
 
     with st.chat_message("assistant"):
-        with st.spinner("establishing link..."):
+        with st.spinner("establishing uplink..."):
             try:
                 data = ask_backend(question, collection["id"])
             except Exception as exc:

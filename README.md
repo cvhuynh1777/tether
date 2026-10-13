@@ -35,21 +35,32 @@ pip install -r requirements.txt
 cp .env.example .env          # then fill in PROJECT_ENDPOINT
 az login
 
-# terminal 1
-python -m uvicorn backend.main:app --reload --reload-include "*.json"
-
-# terminal 2
+# quickest: the app on its own
 python -m streamlit run frontend/app.py
+
+# or with the API (two terminals)
+python -m uvicorn backend.main:app --reload --reload-include "*.json"
+BACKEND_URL=http://127.0.0.1:8000 python -m streamlit run frontend/app.py
 ```
 
 API docs: http://127.0.0.1:8000/docs · App: http://localhost:8501
+
+The Streamlit app runs in two modes:
+- **With the API:** set `BACKEND_URL=http://127.0.0.1:8000` and it calls the FastAPI server over HTTP (this is how the container image runs).
+- **Standalone:** leave `BACKEND_URL` unset and it calls `backend/service.py` directly, so only `streamlit run` is needed.
+
+## Deployment
+
+- **Streamlit Community Cloud (current demo):** standalone mode. The app authenticates to Foundry with a service principal limited to the *Azure AI User* role, supplied as secrets (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_CLIENT_SECRET`, `PROJECT_ENDPOINT`).
+- **Azure Container Apps:** the `Dockerfile` runs the API and the UI in one container, authenticating with a managed identity, so no secrets are stored.
 
 ## Project structure
 
 ```
 backend/
   agent_client.py     Foundry agent wrapper (conversations, citation extraction)
-  main.py             FastAPI app: /health, /collections, /chat
+  service.py          core logic: registry, routing, rate limit, citation metadata
+  main.py             FastAPI layer over service.py: /health, /collections, /chat
   collections.json    collection registry
   sources/lts.json    citation metadata for the space sustainability collection
 frontend/
