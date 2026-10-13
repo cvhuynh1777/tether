@@ -380,6 +380,51 @@ a:hover { color: var(--green) !important; }
   margin: 0.4rem 0 0.35rem;
 }
 .tt-sidenote { font-size: 0.72rem; line-height: 1.5; color: var(--muted); margin: 0 0 0.8rem; }
+.tt-side-title.tt-gap { margin-top: 1.4rem; }
+
+/* ---------- Catalog ---------- */
+.tt-stats {
+  display: flex; flex-wrap: wrap; gap: 1.2rem;
+  margin-top: 0.8rem;
+  font-family: var(--font-label);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.tt-stats b { color: var(--text); font-size: 1rem; margin-right: 0.25rem; }
+.tt-stats .ok b { color: var(--green); }
+.tt-count {
+  font-family: var(--font-label);
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0.2rem 0 0.6rem;
+}
+.tt-doc {
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(124,154,142,0.2);
+  border-left: 2px solid var(--green);
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.5rem;
+}
+.tt-doc .title { font-size: 0.88rem; line-height: 1.45; color: var(--text); }
+.tt-doc .meta {
+  margin-top: 0.3rem;
+  font-family: var(--font-label);
+  font-size: 0.72rem;
+  color: var(--muted);
+  word-break: break-word;
+}
+/* Filters: square, dark fields with a quiet border */
+[data-testid="stSelectbox"] label p, [data-testid="stTextInput"] label p {
+  font-family: var(--font-label) !important;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+[data-testid="stTextInput"] [data-baseweb="input"] {
+  border-radius: 0 !important;
+  background: var(--panel) !important;
+  border-color: rgba(124,154,142,0.3) !important;
+}
 
 /* Collection rows (buttons): small, quiet, no prefix */
 [class*="st-key-col-"] button,
@@ -589,6 +634,73 @@ def fetch_collections() -> list[dict]:
     return resp.json()
 
 
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_catalog(collection_id: str) -> dict:
+    """Every document a collection answers from."""
+    if not BACKEND_URL:
+        from backend import service
+
+        return service.catalog(collection_id)
+    resp = requests.get(f"{BACKEND_URL}/collections/{collection_id}/documents", timeout=10)
+    resp.raise_for_status()
+    return resp.json()
+
+
+def render_catalog(collection: dict) -> None:
+    try:
+        cat = fetch_catalog(collection["id"])
+    except Exception:
+        render_error("Couldn't load the document catalog for this collection.")
+        return
+
+    st.markdown(
+        f"""
+<div class="tt-boot tt-panel">
+  <div class="tt-purpose">The vetted documents Tether answers from for {esc(collection["name"]).lower()}.
+  Each one links to its official source.</div>
+  <div class="tt-stats"><span class="ok"><b>{cat["total"]}</b> documents</span></div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
+    docs = cat["documents"]
+    if not docs:
+        st.markdown('<p class="tt-note">No documents catalogued yet.</p>', unsafe_allow_html=True)
+        return
+
+    c1, c2 = st.columns([2, 3])
+    with c1:
+        types = sorted({d["type"] for d in docs if d.get("type")})
+        doc_type = st.selectbox("Type", ["All types"] + types, key="cat_type")
+    with c2:
+        query = st.text_input("Search", placeholder="Title, symbol or country", key="cat_query")
+
+    q = query.strip().lower()
+    shown = [
+        d for d in docs
+        if (doc_type == "All types" or d.get("type") == doc_type)
+        and (not q or q in " ".join(str(d.get(k) or "") for k in ("title", "symbol", "submitted_by")).lower())
+    ]
+
+    st.markdown(
+        f'<div class="tt-count">Showing {len(shown)} of {len(docs)}</div>',
+        unsafe_allow_html=True,
+    )
+    rows = []
+    for d in shown:
+        meta = [d.get("symbol"), d.get("year"), d.get("type"), d.get("submitted_by")]
+        meta_html = " // ".join(esc(m) for m in meta if m)
+        title = esc(d["title"])
+        if d.get("url"):
+            title = f'<a href="{esc(d["url"])}" target="_blank" rel="noopener noreferrer">{title}</a>'
+        rows.append(
+            f'<div class="tt-doc"><div class="title">{title}</div>'
+            f'<div class="meta">{meta_html}</div></div>'
+        )
+    st.markdown("".join(rows) or '<p class="tt-note">No documents match these filters.</p>', unsafe_allow_html=True)
+
+
 def reset_conversation() -> None:
     # Each collection has its own agent, so a conversation can't carry across.
     st.session_state.messages = []
@@ -642,6 +754,16 @@ with st.sidebar:
 
     collection = next(c for c in live if c["id"] == selected_id)
 
+    st.markdown('<div class="tt-side-title tt-gap">Services</div>', unsafe_allow_html=True)
+    if "view" not in st.session_state:
+        st.session_state.view = "chat"
+    for view_id, label in (("chat", "Ask questions"), ("catalog", "Browse documents")):
+        is_selected = st.session_state.view == view_id
+        key = f"colsel-view-{view_id}" if is_selected else f"col-view-{view_id}"
+        if st.button(label, key=key) and not is_selected:
+            st.session_state.view = view_id
+            st.rerun()
+
     with st.expander("System details", expanded=False):
         specs = [
             ("Model", MODEL),
@@ -681,6 +803,13 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
+# ---------------------------------------------------------------------------
+# Catalog view
+# ---------------------------------------------------------------------------
+if st.session_state.view == "catalog":
+    render_catalog(collection)
+    st.stop()
 
 # ---------------------------------------------------------------------------
 # Empty state: boot sequence + suggested prompts

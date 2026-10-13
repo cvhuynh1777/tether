@@ -33,19 +33,22 @@ class ServiceError(Exception):
 # ---------------------------------------------------------------------------
 # Collections registry
 # ---------------------------------------------------------------------------
-def _load_sources(sources_file: str | None) -> dict[str, dict]:
-    """Readable titles and official links for a collection's PDFs, keyed by filename."""
+def _load_catalog(sources_file: str | None) -> list[dict]:
+    """Every document in a collection's metadata file, ingested or not."""
     if not sources_file:
-        return {}
-    entries = json.loads((BACKEND_DIR / sources_file).read_text())
-    return {e["filename"].lower(): e for e in entries if e.get("filename")}
+        return []
+    return json.loads((BACKEND_DIR / sources_file).read_text())
 
 
 def load_collections() -> dict[str, dict]:
     raw = json.loads((BACKEND_DIR / "collections.json").read_text())
     collections = {}
     for c in raw:
-        c["_sources"] = _load_sources(c.get("sources_file"))
+        c["_catalog"] = _load_catalog(c.get("sources_file"))
+        # Citation lookup: readable titles and official links, keyed by filename.
+        c["_sources"] = {
+            e["filename"].lower(): e for e in c["_catalog"] if e.get("filename")
+        }
         collections[c["id"]] = c
     return collections
 
@@ -59,6 +62,24 @@ PUBLIC_FIELDS = ("id", "name", "description", "status", "retrieval", "examples")
 def public_collections() -> list[dict]:
     """Collection info that's safe to send to the browser."""
     return [{k: c[k] for k in PUBLIC_FIELDS} for c in COLLECTIONS.values()]
+
+
+CATALOG_FIELDS = ("symbol", "year", "type", "submitted_by", "title", "url")
+
+
+def catalog(collection_id: str) -> dict:
+    """The documents a collection answers from."""
+    collection = COLLECTIONS.get(collection_id)
+    if collection is None:
+        raise ServiceError(404, f"Unknown collection '{collection_id}'.")
+    docs = [{k: d.get(k) for k in CATALOG_FIELDS} for d in collection["_catalog"]]
+    docs.sort(key=lambda d: (-(d["year"] or 0), d["title"]))  # newest first
+    return {
+        "collection": collection["id"],
+        "name": collection["name"],
+        "total": len(docs),
+        "documents": docs,
+    }
 
 
 def get_live_collection(collection_id: str) -> dict:

@@ -77,6 +77,30 @@ def list_collections():
     return service.public_collections()
 
 
+class DocumentOut(BaseModel):
+    symbol: str
+    year: int | None
+    type: str | None
+    submitted_by: str | None
+    title: str
+    url: str | None
+
+
+class CatalogOut(BaseModel):
+    collection: str
+    name: str
+    total: int
+    documents: list[DocumentOut]
+
+
+@app.get("/collections/{collection_id}/documents", response_model=CatalogOut)
+def list_documents(collection_id: str):
+    try:
+        return service.catalog(collection_id)
+    except service.ServiceError as exc:
+        raise HTTPException(status_code=exc.status, detail=exc.detail)
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest, request: Request):
     # The Streamlit frontend sends one ID per browser session; direct API

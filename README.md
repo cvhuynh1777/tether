@@ -15,6 +15,7 @@ Streamlit UI  ──►  FastAPI backend  ──►  Microsoft Foundry agent (gp
 
 - **Collections registry** (`backend/collections.json`): each subject of study has its own agent, metadata file and suggested questions. Adding a collection is a config change, not a code change.
 - **Citations with provenance** (`backend/sources/*.json`): each cited file is mapped to its official title, UN document symbol, year and a link to the authoritative PDF.
+- **Document catalog:** a browsable, searchable list of every vetted document a collection answers from, filterable by document type, each linked to its official source (`GET /collections/{id}/documents`).
 - **Pluggable retrieval:** every collection declares a `backend`. Today that's `foundry_agent`; an Azure AI Search retriever slots into the same routing function later.
 - **No keys in code:** the backend authenticates with `DefaultAzureCredential`, using `az login` locally and a managed identity when deployed.
 
@@ -60,7 +61,8 @@ The Streamlit app runs in two modes:
 backend/
   agent_client.py     Foundry agent wrapper (conversations, citation extraction)
   service.py          core logic: registry, routing, rate limit, citation metadata
-  main.py             FastAPI layer over service.py: /health, /collections, /chat
+  main.py             FastAPI layer over service.py: /health, /collections,
+                      /collections/{id}/documents, /chat
   collections.json    collection registry
   sources/lts.json    citation metadata for the space sustainability collection
 frontend/

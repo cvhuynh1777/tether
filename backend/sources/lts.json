@@ -3,70 +3,44 @@
     "filename": "v1805022.pdf",
     "symbol": "LTS Guidelines",
     "year": 2019,
+    "type": "Guidelines",
+    "submitted_by": null,
     "title": "Guidelines for the Long-term Sustainability of Outer Space Activities",
     "url": "https://spacesustainability.unoosa.org/node/357"
   },
-
   {
     "filename": "A_79_20E.pdf",
     "symbol": "A/79/20",
     "year": 2024,
+    "type": "Committee report",
+    "submitted_by": null,
     "title": "Report of the Committee on the Peaceful Uses of Outer Space (2024)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/a/a7920_0_html/A_79_20E.pdf"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/1315",
-    "year": 2024,
-    "title": "Report on the UN/Portugal Conference on the Management and Sustainability of Outer Space Activities (Lisbon, May 2024)",
-    "url": "https://docs.un.org/en/A/AC.105/1315"
   },
   {
     "filename": "UNOOSA_Annual_Report_2023.pdf",
     "symbol": "ST/SPACE/90",
     "year": 2024,
+    "type": "Annual report",
+    "submitted_by": null,
     "title": "UNOOSA Annual Report 2023",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/stspace/stspace90_0_html/UNOOSA_Annual_Report_2023.pdf"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/C.1/L.410/Rev.1",
-    "year": 2024,
-    "title": "LTS implementation experiences, capacity-building opportunities and challenges (Chair's working paper, revised)",
-    "url": "https://docs.un.org/en/A/AC.105/C.1/L.410/Rev.1"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/C.1/L.410",
-    "year": 2024,
-    "title": "LTS implementation experiences, capacity-building opportunities and challenges (Chair's working paper)",
-    "url": "https://docs.un.org/en/A/AC.105/C.1/L.410"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/C.1/126",
-    "year": 2024,
-    "title": "Report on the Workshop of the LTS Working Group (Vienna, February 2024)",
-    "url": "https://docs.un.org/en/A/AC.105/C.1/126"
   },
   {
     "filename": "AC105_1307E.pdf",
     "symbol": "A/AC.105/1307",
     "year": 2024,
+    "type": "Subcommittee report",
+    "submitted_by": null,
     "title": "Report of the Scientific and Technical Subcommittee, 61st session (2024)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105/aac_1051307_0_html/AC105_1307E.pdf"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/C.1/LTS/2024/L.1",
-    "year": 2024,
-    "title": "Draft report of the LTS Working Group (2024)",
-    "url": "https://docs.un.org/en/A/AC.105/C.1/LTS/2024/L.1"
   },
   {
     "filename": "AC105_C1_2024_CRP34E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.34",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": "Portugal",
     "title": "Technical preparatory symposium for the UN/Portugal space sustainability conference (Portugal)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_34_0_html/AC105_C1_2024_CRP34E.pdf"
   },
@@ -74,6 +48,8 @@
     "filename": "AC105_C1_2024_CRP32E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.32",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": "India",
     "title": "Proposal for a new LTS guideline (India)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_32_0_html/AC105_C1_2024_CRP32E.pdf"
   },
@@ -81,6 +57,8 @@
     "filename": "AC105_C1_2024_CRP25E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.25",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": "Iran",
     "title": "Bridging the gap: empowering States in pursuit of space sustainability (Iran)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_25_0_html/AC105_C1_2024_CRP25E.pdf"
   },
@@ -88,6 +66,8 @@
     "filename": "AC105_C1_2024_CRP21E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.21",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": "United Kingdom",
     "title": "UK reporting approach for voluntary implementation of the LTS Guidelines",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_21_0_html/AC105_C1_2024_CRP21E.pdf"
   },
@@ -95,20 +75,17 @@
     "filename": "AC105_C1_2024_CRP15E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.15",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": null,
     "title": "Good practices for sustainable lunar activities: due regard to lunar science and ethics",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_15_0_html/AC105_C1_2024_CRP15E.pdf"
-  },
-  {
-    "filename": "AC105_C1_2024_CRP014E.pdf",
-    "symbol": "A/AC.105/C.1/2024/CRP.14",
-    "year": 2024,
-    "title": "Protection of astronomy and science on the Moon",
-    "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_14_0_html/AC105_C1_2024_CRP014E.pdf"
   },
   {
     "filename": "AC105_C1_2024_CRP13E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.13",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": null,
     "title": "Towards an intergenerational pact for space sustainability",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_13_0_html/AC105_C1_2024_CRP13E.pdf"
   },
@@ -116,6 +93,8 @@
     "filename": "AC105_C1_2024_CRP05E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.5",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": "Moon Village Association",
     "title": "Written contribution of the Moon Village Association to the LTS Working Group",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_5_0_html/AC105_C1_2024_CRP05E.pdf"
   },
@@ -123,14 +102,17 @@
     "filename": "AC105_C1_2024_CRP04E.pdf",
     "symbol": "A/AC.105/C.1/2024/CRP.4",
     "year": 2024,
+    "type": "Conference room paper",
+    "submitted_by": "Canada",
     "title": "Update on implementation of the LTS Guidelines (Canada)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2024/aac_105c_12024crp/aac_105c_12024crp_4_0_html/AC105_C1_2024_CRP04E.pdf"
   },
-
   {
     "filename": "UNOOSA-Ensuring-Responsible-AI-in-Space-and-Earth-Observation.pdf",
     "symbol": "UNOOSA/PB/1",
     "year": 2025,
+    "type": "Policy brief",
+    "submitted_by": null,
     "title": "Policy brief: ensuring responsible AI in space and Earth observation",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2025/p/-_0_html/UNOOSA-Ensuring-Responsible-AI-in-Space-and-Earth-Observation.pdf"
   },
@@ -138,6 +120,8 @@
     "filename": "A_80_20E.pdf",
     "symbol": "A/80/20",
     "year": 2025,
+    "type": "Committee report",
+    "submitted_by": null,
     "title": "Report of the Committee on the Peaceful Uses of Outer Space (2025)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2025/a/a8020_0_html/A_80_20E.pdf"
   },
@@ -145,6 +129,8 @@
     "filename": "st_space_61rev03E.pdf",
     "symbol": "ST/SPACE/61/Rev.3",
     "year": 2025,
+    "type": "Compendium",
+    "submitted_by": null,
     "title": "International Space Law: United Nations Instruments",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2025/stspace/stspace61rev_3_0_html/st_space_61rev03E.pdf"
   },
@@ -152,49 +138,26 @@
     "filename": "UNOOSA_Annual_Report_2024.pdf",
     "symbol": "ST/SPACE/93",
     "year": 2025,
+    "type": "Annual report",
+    "submitted_by": null,
     "title": "UNOOSA Annual Report 2024: from strategy to action",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2025/stspace/stspace93_0_html/UNOOSA_Annual_Report_2024.pdf"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/1361",
-    "year": 2025,
-    "title": "Long-term sustainability of outer space activities: submissions",
-    "url": "https://docs.un.org/en/A/AC.105/1361"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/C.1/L.423",
-    "year": 2025,
-    "title": "Draft final report of the LTS Working Group",
-    "url": "https://docs.un.org/en/A/AC.105/C.1/L.423"
   },
   {
     "filename": "AC105_1338E.pdf",
     "symbol": "A/AC.105/1338",
     "year": 2025,
+    "type": "Subcommittee report",
+    "submitted_by": null,
     "title": "Report of the Scientific and Technical Subcommittee, 62nd session (2025)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2025/aac_105/aac_1051338_0_html/AC105_1338E.pdf"
   },
   {
-    "filename": null,
-    "symbol": "A/AC.105/C.1/L.419",
-    "year": 2025,
-    "title": "Draft report of the LTS Working Group (2025)",
-    "url": "https://docs.un.org/en/A/AC.105/C.1/L.419"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/1336",
-    "year": 2025,
-    "title": "UN/IAF Workshop: space sustainability as a game changer for development (Milan, October 2024)",
-    "url": "https://docs.un.org/en/A/AC.105/1336"
-  },
-
-  {
     "filename": "AC105_1346E.pdf",
     "symbol": "A/AC.105/1346",
     "year": 2026,
+    "type": "Subcommittee report",
+    "submitted_by": null,
     "title": "Report of the Scientific and Technical Subcommittee, 63rd session (2026)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2026/aac_105/aac_1051346_0_html/AC105_1346E.pdf"
   },
@@ -202,20 +165,17 @@
     "filename": "Safeguarding_Space_Issues_Note_final.pdf",
     "symbol": "UNOOSA/2026/IN/1",
     "year": 2026,
+    "type": "Issues note",
+    "submitted_by": null,
     "title": "Safeguarding space: environmental issues, risks and responsibilities",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2026/i/unoosain1_0_html/Safeguarding_Space_Issues_Note_final.pdf"
-  },
-  {
-    "filename": null,
-    "symbol": "A/AC.105/1361/Add.1",
-    "year": 2026,
-    "title": "LTS submissions from Germany, Singapore, CANEUS, IAU, ITU and UNISEC-Global",
-    "url": "https://docs.un.org/en/A/AC.105/1361/Add.1"
   },
   {
     "filename": "AC105_C1_133E.pdf",
     "symbol": "A/AC.105/C.1/133",
     "year": 2026,
+    "type": "Working group report",
+    "submitted_by": null,
     "title": "Report of the LTS Working Group (2026)",
     "url": "https://www.unoosa.org/res/oosadoc/data/documents/2026/aac_105c_1/aac_105c_1133_0_html/AC105_C1_133E.pdf"
   }
