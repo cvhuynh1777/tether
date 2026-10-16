@@ -3,8 +3,8 @@
 Two ways to run it:
 - With the FastAPI server: set BACKEND_URL (e.g. http://127.0.0.1:8000) and
   the app talks to the API over HTTP. The container image does this.
-- On its own (Streamlit Community Cloud, or quick local runs): leave
-  BACKEND_URL unset and the app calls backend/service.py directly.
+- On its own (Azure App Service, or quick local runs): leave BACKEND_URL
+  unset and the app calls backend/service.py directly.
 
 Run locally (from the tether/ folder):
     python -m streamlit run frontend/app.py
@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-try:  # local runs read .env; on Streamlit Cloud the secrets are env vars already
+try:  # local runs read .env; on App Service the settings are env vars already
     from dotenv import load_dotenv
 
     load_dotenv(ROOT / ".env")
@@ -35,15 +35,16 @@ except ImportError:
 
 BACKEND_URL = os.environ.get("BACKEND_URL")  # unset = embedded mode
 
-MODEL = "gpt-5-mini"
-PLATFORM = "Microsoft Foundry on Azure"
+MODEL = "gpt-5-mini (Azure OpenAI)"
+EMBEDDINGS = "text-embedding-3-small (Azure OpenAI)"
+PLATFORM = "Azure App Service"
 RATE_LIMIT = "5 questions per minute, for the public demo"
 
 # Where the project is now and where it's heading, shown in the sidebar.
 ROADMAP = [
-    ("Now", "A FastAPI and Streamlit web app calling a Microsoft Foundry agent that retrieves from UN documents with file search."),
+    ("Now", "A FastAPI and Streamlit app on my own retrieval pipeline: UN PDFs chunked by page, indexed in Azure AI Search, and answered by gpt-5-mini with page-level citations."),
     ("Next", "Ingest more documents into the current collection, and add new collections such as space debris and space resources."),
-    ("Later", "A vetted vector database on Azure AI Search for researchers (currently limited by my school Azure account)."),
+    ("Later", "An evaluation benchmark for answer grounding, and an automated pipeline that keeps each collection current."),
 ]
 
 st.set_page_config(
@@ -550,22 +551,51 @@ def esc(value) -> str:
     return html.escape(str(value)) if value is not None else ""
 
 
+def _refs_label(refs: list[int]) -> str:
+    """[1, 2, 3, 5] -> '1–3, 5'"""
+    refs = sorted(set(refs))
+    parts, start = [], None
+    for i, n in enumerate(refs):
+        if start is None:
+            start = n
+        if i == len(refs) - 1 or refs[i + 1] != n + 1:
+            parts.append(str(start) if start == n else f"{start}–{n}")
+            start = None
+    return ", ".join(parts)
+
+
 def render_sources(citations: list[dict]) -> None:
+    """One line per document; each cited page links to that page of the PDF."""
     if not citations:
         return
-    rows = []
+    groups: dict[str, dict] = {}
     for c in citations:
-        title = c.get("title") or c.get("filename") or c.get("file_id") or "Unknown document"
-        page = f"p. {c['page']}" if c.get("page") else None
-        ref = " // ".join(esc(x) for x in (c.get("symbol"), c.get("year"), page) if x)
-        ref_html = f' <span class="ref">[{ref}]</span>' if ref else ""
+        key = c.get("filename") or c.get("file_id") or c.get("title") or "?"
+        g = groups.setdefault(key, {"c": c, "refs": [], "pages": {}})
         if c.get("ref"):
-            title = f"[{c['ref']}] {title}"
-        if c.get("url"):
-            body = f'<a href="{esc(c["url"])}" target="_blank" rel="noopener noreferrer">{esc(title)}</a>'
-        else:
-            body = esc(title)
-        rows.append(f'<span class="tt-source">{body}{ref_html}</span>')
+            g["refs"].append(c["ref"])
+        if c.get("page") and c["page"] not in g["pages"]:
+            g["pages"][c["page"]] = c.get("url")
+
+    rows = []
+    for g in groups.values():
+        c = g["c"]
+        title = c.get("title") or c.get("filename") or c.get("file_id") or "Unknown document"
+        refs = f"[{_refs_label(g['refs'])}] " if g["refs"] else ""
+        base_url = (c.get("url") or "").split("#")[0]
+        title_html = (
+            f'<a href="{esc(base_url)}" target="_blank" rel="noopener noreferrer">{esc(title)}</a>'
+            if base_url else esc(title)
+        )
+        pages = sorted(g["pages"].items())
+        page_links = ", ".join(
+            f'<a href="{esc(url)}" target="_blank" rel="noopener noreferrer">{p}</a>' if url else str(p)
+            for p, url in pages
+        )
+        page_label = (f"{'pp.' if len(pages) > 1 else 'p.'} {page_links}") if pages else None
+        meta = " // ".join(x for x in (esc(c.get("symbol")), esc(c.get("year")), page_label) if x)
+        meta_html = f' <span class="ref">[{meta}]</span>' if meta else ""
+        rows.append(f'<span class="tt-source">{esc(refs)}{title_html}{meta_html}</span>')
     st.markdown(
         '<div class="tt-sources"><div class="tt-label">Sources</div>' + "".join(rows) + "</div>",
         unsafe_allow_html=True,
@@ -769,9 +799,10 @@ with st.sidebar:
 
     with st.expander("System details", expanded=False):
         specs = [
-            ("Model", MODEL),
-            ("Platform", PLATFORM),
+            ("Answer model", MODEL),
+            ("Embeddings", EMBEDDINGS),
             ("Retrieval", collection["retrieval"]),
+            ("Hosting", PLATFORM),
             ("Corpus", collection["description"]),
             ("Rate limit", RATE_LIMIT),
         ]
