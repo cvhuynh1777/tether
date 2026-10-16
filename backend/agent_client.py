@@ -16,6 +16,8 @@ class Citation:
     filename: str | None
     file_id: str | None
     quote: str | None = None
+    page: int | None = None   # set by retrieval backends that know the page
+    ref: int | None = None    # the [n] marker used in the answer text
 
 
 @dataclass

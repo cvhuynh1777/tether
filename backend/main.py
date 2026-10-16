@@ -26,10 +26,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Tether API", lifespan=lifespan)
 
 
+class Filters(BaseModel):
+    year_from: int | None = None
+    year_to: int | None = None
+    doc_type: str | None = None
+    submitted_by: str | None = None
+
+
 class ChatRequest(BaseModel):
     message: str
     collection: str = service.DEFAULT_COLLECTION
     conversation_id: str | None = None
+    filters: Filters | None = None  # applied by search-index backends only
 
     # Pre-fills the /docs page with a valid request.
     model_config = {
@@ -45,6 +53,8 @@ class CitationOut(BaseModel):
     filename: str | None
     file_id: str | None
     quote: str | None = None
+    page: int | None = None
+    ref: int | None = None
     title: str | None = None
     symbol: str | None = None
     year: int | None = None
@@ -117,6 +127,7 @@ async def chat(req: ChatRequest, request: Request):
             req.collection,
             req.conversation_id,
             visitor,
+            req.filters.model_dump(exclude_none=True) if req.filters else None,
         )
     except service.ServiceError as exc:
         raise HTTPException(status_code=exc.status, detail=exc.detail)

@@ -556,8 +556,11 @@ def render_sources(citations: list[dict]) -> None:
     rows = []
     for c in citations:
         title = c.get("title") or c.get("filename") or c.get("file_id") or "Unknown document"
-        ref = " // ".join(esc(x) for x in (c.get("symbol"), c.get("year")) if x)
+        page = f"p. {c['page']}" if c.get("page") else None
+        ref = " // ".join(esc(x) for x in (c.get("symbol"), c.get("year"), page) if x)
         ref_html = f' <span class="ref">[{ref}]</span>' if ref else ""
+        if c.get("ref"):
+            title = f"[{c['ref']}] {title}"
         if c.get("url"):
             body = f'<a href="{esc(c["url"])}" target="_blank" rel="noopener noreferrer">{esc(title)}</a>'
         else:

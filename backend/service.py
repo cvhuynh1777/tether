@@ -115,32 +115,67 @@ def check_rate_limit(visitor: str) -> None:
 # Retrieval backends
 # ---------------------------------------------------------------------------
 class AgentPool:
-    """One authenticated client per Foundry agent, created on first use."""
+    """One client per retrieval target (Foundry agent or search index), created on first use."""
 
     def __init__(self, endpoint: str | None = None):
-        self._endpoint = endpoint or os.environ["PROJECT_ENDPOINT"]
-        self._clients: dict[str, AgentClient] = {}
+        self._endpoint = endpoint or os.environ.get("PROJECT_ENDPOINT")
+        self._clients: dict[str, object] = {}
         self._lock = threading.Lock()
 
     def get(self, agent_name: str) -> AgentClient:
         with self._lock:
-            if agent_name not in self._clients:
-                self._clients[agent_name] = AgentClient(self._endpoint, agent_name)
-            return self._clients[agent_name]
+            key = f"agent:{agent_name}"
+            if key not in self._clients:
+                if not self._endpoint:
+                    raise ServiceError(500, "PROJECT_ENDPOINT isn't set.")
+                self._clients[key] = AgentClient(self._endpoint, agent_name)
+            return self._clients[key]
+
+    def get_retriever(self, index_name: str):
+        with self._lock:
+            key = f"search:{index_name}"
+            if key not in self._clients:
+                from backend.search_backend import SearchRetriever
+
+                self._clients[key] = SearchRetriever(index_name)
+            return self._clients[key]
 
     def close(self) -> None:
         for client in self._clients.values():
             client.close()
 
 
+def _odata(value: str) -> str:
+    return value.replace("'", "''")
+
+
+def build_filter(filters: dict | None) -> str | None:
+    """Turn {year_from, year_to, doc_type, submitted_by} into an OData filter."""
+    if not filters:
+        return None
+    parts = []
+    if filters.get("year_from"):
+        parts.append(f"year ge {int(filters['year_from'])}")
+    if filters.get("year_to"):
+        parts.append(f"year le {int(filters['year_to'])}")
+    for field in ("doc_type", "submitted_by"):
+        if filters.get(field):
+            parts.append(f"{field} eq '{_odata(str(filters[field]))}'")
+    return " and ".join(parts) or None
+
+
 def _enrich(citation, sources: dict[str, dict]) -> dict:
     meta = sources.get((citation.filename or "").lower(), {})
+    url = meta.get("url")
+    # Deep-link straight to the cited page when the source is a PDF.
+    if url and citation.page and url.lower().endswith(".pdf"):
+        url = f"{url}#page={citation.page}"
     return {
         **vars(citation),
         "title": meta.get("title"),
         "symbol": meta.get("symbol"),
         "year": meta.get("year"),
-        "url": meta.get("url"),
+        "url": url,
     }
 
 
@@ -150,6 +185,7 @@ def chat(
     collection_id: str = DEFAULT_COLLECTION,
     conversation_id: str | None = None,
     visitor: str = "unknown",
+    filters: dict | None = None,
 ) -> dict:
     """Answer one question. Returns {answer, collection, conversation_id, citations}."""
     message = (message or "").strip()
@@ -160,11 +196,16 @@ def chat(
     check_rate_limit(visitor)
 
     try:
-        if collection["backend"] == "foundry_agent":
+        backend = collection["backend"]
+        if backend == "azure_ai_search":
+            index = collection.get("search_index") or os.environ.get("AZURE_SEARCH_INDEX")
+            if not index:
+                raise ServiceError(500, "No search index configured for this collection.")
+            reply = pool.get_retriever(index).ask(message, conversation_id, build_filter(filters))
+        elif backend == "foundry_agent":
             reply = pool.get(collection["agent_name"]).ask(message, conversation_id)
-        # Future: elif collection["backend"] == "azure_ai_search": ...
         else:
-            raise ServiceError(501, f"Backend '{collection['backend']}' isn't built yet.")
+            raise ServiceError(501, f"Backend '{backend}' isn't built yet.")
     except ServiceError:
         raise
     except Exception as exc:
@@ -175,7 +216,7 @@ def chat(
             raise ServiceError(
                 400, "Unknown conversation_id. Omit it (or send null) to start a new conversation."
             )
-        raise ServiceError(502, f"Agent call failed: {exc}")
+        raise ServiceError(502, f"Retrieval or model call failed: {exc}")
 
     return {
         "answer": reply.answer,
